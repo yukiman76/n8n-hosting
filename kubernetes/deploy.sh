@@ -1,5 +1,3 @@
-#!/bin/bash
-
 # Exit immediately if a command fails
 set -e
 
