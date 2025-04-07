@@ -28,10 +28,15 @@ SECRET_NAMESPACE="n8n"
 
 # Now get all the configuration values from the secret
 DB_NAME=$(kubectl get secret -n "$SECRET_NAMESPACE" "$SECRET_NAME" -o jsonpath="{.stringData.POSTGRES_DB}" | base64 --decode)
+echo $DB_NAME
 NAMESPACE=$(kubectl get secret -n "$SECRET_NAMESPACE" "$SECRET_NAME" -o jsonpath="{.stringData.namespace}" | base64 --decode)
+echo $NAMESPACE
 POD_LABEL=$(kubectl get secret -n "$SECRET_NAMESPACE" "$SECRET_NAME" -o jsonpath="{.data.pod_label}" | base64 --decode)
+echo $POD_LABEL
 DB_USER=$(kubectl get secret -n "$SECRET_NAMESPACE" "$SECRET_NAME" -o jsonpath="{.stringData.POSTGRES_USER}" | base64 --decode)
+echo $DB_USER
 DB_PASSWORD=$(kubectl get secret -n "$SECRET_NAMESPACE" "$SECRET_NAME" -o jsonpath="{.stringData.POSTGRES_PASSWORD}" | base64 --decode)
+echo $DB_USER
 
 # Validate that we got all the required configuration
 if [ -z "$DB_NAME" ] || [ -z "$NAMESPACE" ] || [ -z "$POD_LABEL" ] || [ -z "$DB_USER" ] || [ -z "$DB_PASSWORD" ]; then
