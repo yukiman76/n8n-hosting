@@ -1,3 +1,5 @@
+#!/bin/bash
+source ~/.bashrc
 # Exit immediately if a command fails
 set -e
 
