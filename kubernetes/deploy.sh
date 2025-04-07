@@ -1,5 +1,11 @@
 #!/bin/bash
-source ~/.bash_aliases 
+
+# Source aliases file
+source ~/.bash_aliases
+
+# Enable alias expansion
+shopt -s expand_aliases
+
 # Exit immediately if a command fails
 set -e
 
