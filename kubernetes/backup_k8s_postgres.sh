@@ -25,9 +25,9 @@ echo "Retrieving database configuration from secret $SECRET_NAME"
 
 
 # Now get all the configuration values from the secret
-DB_NAME=$(kubectl get secret -n "$NAMESPACE" "$SECRET_NAME" -o jsonpath="{.data.POSTGRES_DB}")
-DB_USER=$(kubectl get secret -n "$NAMESPACE" "$SECRET_NAME" -o jsonpath="{.data.POSTGRES_USER}")
-DB_PASSWORD=$(kubectl get secret -n "$NAMESPACE" "$SECRET_NAME" -o jsonpath="{.data.POSTGRES_PASSWORD}")
+DB_NAME=$(kubectl get secret -n "$NAMESPACE" "$SECRET_NAME" -o jsonpath="{.data.POSTGRES_DB}"| base64 --decode)
+DB_USER=$(kubectl get secret -n "$NAMESPACE" "$SECRET_NAME" -o jsonpath="{.data.POSTGRES_USER}"| base64 --decode)
+DB_PASSWORD=$(kubectl get secret -n "$NAMESPACE" "$SECRET_NAME" -o jsonpath="{.data.POSTGRES_PASSWORD}"| base64 --decode)
 
 # Validate that we got all the required configuration
 if [ -z "$DB_NAME" ] || [ -z "$NAMESPACE" ] ||  [ -z "$DB_USER" ] || [ -z "$DB_PASSWORD" ]; then
