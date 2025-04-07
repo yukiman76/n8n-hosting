@@ -1,5 +1,5 @@
 #!/bin/bash
-source ~/.bashrc
+source ~/.bash_aliases 
 # Exit immediately if a command fails
 set -e
 
