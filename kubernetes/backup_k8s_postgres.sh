@@ -24,7 +24,7 @@ echo "Retrieving database configuration from secret $SECRET_NAME"
 
 # Get the namespace from the secret first (if we're using cross-namespace access)
 # Comment this out if your script already has the right namespace context
-SECRET_NAMESPACE=$(kubectl get secret "$SECRET_NAME" -o jsonpath="{.metadata.namespace}")
+SECRET_NAMESPACE="n8n"
 
 # Now get all the configuration values from the secret
 DB_NAME=$(kubectl get secret -n "$SECRET_NAMESPACE" "$SECRET_NAME" -o jsonpath="{.data.database}" | base64 --decode)
