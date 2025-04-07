@@ -9,7 +9,8 @@ spec:
   type: NodePort
   ports:
     - name: "30500"
-      port: 30500
+      port: 5678
+      nodePort: 30500
       targetPort: 5678
       protocol: TCP
   selector:
