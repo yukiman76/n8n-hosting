@@ -12,6 +12,7 @@ shopt -s expand_aliases
 BACKUP_DIR="./bkups"
 RETENTION_DAYS=7
 SECRET_NAME="postgres-secret"  # Name of the Kubernetes secret with all DB configs
+NAMESPACE="n8n"
 
 # Make sure backup directory exists locally
 mkdir -p "$BACKUP_DIR"
@@ -22,26 +23,16 @@ TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
 # Retrieve all configuration from Kubernetes secret
 echo "Retrieving database configuration from secret $SECRET_NAME"
 
-# Get the namespace from the secret first (if we're using cross-namespace access)
-# Comment this out if your script already has the right namespace context
-SECRET_NAMESPACE="n8n"
 
 # Now get all the configuration values from the secret
-DB_NAME=$(kubectl get secret -n "$SECRET_NAMESPACE" "$SECRET_NAME" -o jsonpath="{.stringData.POSTGRES_DB}" | base64 --decode)
-echo $DB_NAME
-NAMESPACE=$(kubectl get secret -n "$SECRET_NAMESPACE" "$SECRET_NAME" -o jsonpath="{.stringData.namespace}" | base64 --decode)
-echo $NAMESPACE
-POD_LABEL=$(kubectl get secret -n "$SECRET_NAMESPACE" "$SECRET_NAME" -o jsonpath="{.data.pod_label}" | base64 --decode)
-echo $POD_LABEL
-DB_USER=$(kubectl get secret -n "$SECRET_NAMESPACE" "$SECRET_NAME" -o jsonpath="{.stringData.POSTGRES_USER}" | base64 --decode)
-echo $DB_USER
-DB_PASSWORD=$(kubectl get secret -n "$SECRET_NAMESPACE" "$SECRET_NAME" -o jsonpath="{.stringData.POSTGRES_PASSWORD}" | base64 --decode)
-echo $DB_USER
+DB_NAME=$(kubectl get secret -n "$NAMESPACE" "$SECRET_NAME" -o jsonpath="{.data.POSTGRES_DB}")
+DB_USER=$(kubectl get secret -n "$NAMESPACE" "$SECRET_NAME" -o jsonpath="{.data.POSTGRES_USER}")
+DB_PASSWORD=$(kubectl get secret -n "$NAMESPACE" "$SECRET_NAME" -o jsonpath="{.data.POSTGRES_PASSWORD}")
 
 # Validate that we got all the required configuration
-if [ -z "$DB_NAME" ] || [ -z "$NAMESPACE" ] || [ -z "$POD_LABEL" ] || [ -z "$DB_USER" ] || [ -z "$DB_PASSWORD" ]; then
+if [ -z "$DB_NAME" ] || [ -z "$NAMESPACE" ] ||  [ -z "$DB_USER" ] || [ -z "$DB_PASSWORD" ]; then
     echo "Error: Failed to retrieve all required database configuration from secret $SECRET_NAME"
-    echo "Required fields: database, namespace, pod_label, username, password"
+    echo "Required fields: database, namespace, username, password"
     exit 1
 fi
 
@@ -53,15 +44,14 @@ BACKUP_PATH="${BACKUP_DIR}/${BACKUP_FILENAME}"
 echo "Starting PostgreSQL backup with configuration from secret:"
 echo "Database: $DB_NAME"
 echo "Namespace: $NAMESPACE"
-echo "Pod Label: $POD_LABEL"
 echo "User: $DB_USER"
 echo "Timestamp: $TIMESTAMP"
 
 # Get the PostgreSQL pod name using retrieved namespace and pod label
-PG_POD=$(kubectl get pods -n "$NAMESPACE" -l "$POD_LABEL" -o jsonpath="{.items[0].metadata.name}")
+PG_POD=$(kubectl get pods  -n "$NAMESPACE"  -o name | sed 's/^pod\///' | grep postgres)
 
 if [ -z "$PG_POD" ]; then
-    echo "Error: PostgreSQL pod not found with label $POD_LABEL in namespace $NAMESPACE"
+    echo "Error: PostgreSQL pod not found in namespace $NAMESPACE"
     exit 1
 fi
 
